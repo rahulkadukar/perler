@@ -60,7 +60,7 @@
         console.log(e);
         console.log(data);
         
-        var factor = 2;
+        var factor = Math.round(e / 10);
         var drawing = document.getElementById('drawing');
         var ctxD = drawing.getContext('2d');
 
@@ -89,8 +89,8 @@
             let valX = Math.floor(x / (4 * data.width)) + 1;
             let valY = Math.floor(x / (4 * data.height)) + 1;
             if (valX === counterX && valY === counterY) {
-              counterX += 2;
-              counterY += 2;
+              counterX += factor;
+              counterY += factor;
               elTotal.push(counterX);
               elTotal.push(counterY);
             }            
