@@ -1,0 +1,127 @@
+<html>
+  <head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="jquery-ui.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="jquery-ui.min.css">
+    <title>Image 2 Data</title>
+  </head>
+  <body>
+    <img id="original" src="sample.png" />
+    <div id="slider"></div>
+    <div id="images">
+      <canvas id="drawing"></canvas>
+    </div>
+    <style>
+      #images {padding-top: 30px;}
+    </style>
+    <script>
+      var data = {};
+
+      document.addEventListener('DOMContentLoaded', function() {
+        var myImage = document.getElementById('original');
+        var w = myImage.width, h = myImage.height;
+
+        // Create a Canvas element
+        var canvas = document.createElement('canvas');
+
+        // Size the canvas to the element
+        canvas.width = w;
+        canvas.height = h;
+        data.width = w;
+        data.height = h;
+
+        // Draw image onto the canvas
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(myImage, 0, 0);
+
+        // Finally, get the image data
+        // ('data' is an array of RGBA pixel values for each pixel)
+        data.data = ctx.getImageData(0, 0, w, h); 
+        data.sizeOfArray = data.data.data.length;
+
+        var drawing = document.getElementById('drawing');
+        drawing.width = w;
+        drawing.height = h;
+        
+        var ctxD = drawing.getContext('2d');
+        ctxD.putImageData(data.data, 0, 0);
+      });
+    
+      $(function() {
+        $( "#slider" ).slider({
+          step: 10,
+          slide: function(event, ui) {
+            reDrawImage(ui.value);
+          }
+        });
+      });
+
+      function reDrawImage(e) {
+        console.log(e);
+        console.log(data);
+        
+        var factor = 2;
+        var drawing = document.getElementById('drawing');
+        var ctxD = drawing.getContext('2d');
+
+        ctxD.clearRect(0, 0, data.width, data.height );
+        drawing.width = data.width / factor;
+        drawing.height = data.height / factor;
+
+        var newData = {};
+        var accum = {};
+        accum.r = 0;
+        accum.g = 0;
+        accum.b = 0;
+        accum.a = 0;
+        
+        let counterX = 1;
+        let counterY = 1;
+        let elTotal =[1];
+        let finalArray = [];
+        for (var x = 0; x < data.sizeOfArray; x++) {
+          // First check if that pixel is to be considered
+          let consider;
+          let scaling;
+          let finalList = [];
+
+          if (x % 4 == 0) {
+            let valX = Math.floor(x / (4 * data.width)) + 1;
+            let valY = Math.floor(x / (4 * data.height)) + 1;
+            if (valX === counterX && valY === counterY) {
+              counterX += 2;
+              counterY += 2;
+              elTotal.push(counterX);
+              elTotal.push(counterY);
+            }            
+          }
+        }
+
+        var uniqueNames = [];
+        $.each(elTotal, function(i, el){
+          if($.inArray(el, uniqueNames) === -1) uniqueNames.push(el);
+        });
+
+        for (var x = 0; x < uniqueNames[uniqueNames.length - 1]; x++) {
+          for (var y = 0; y < uniqueNames[uniqueNames.length - 1]; y++) {
+
+            for (var a = 1; a < data.width; a++) {
+              for (var b = 1; b < data.height; b++) {
+                if (a === uniqueNames[x] && b === uniqueNames[y] ) {
+                  // console.log('[' + a + ',' + b + ']');
+                  finalArray.push((((a-1)*4) + ((b-1)*data.width*4)));
+                }
+              }
+            }
+          }
+        }
+        console.log(finalArray.sort(function(a,b) {
+          return a > b;
+        }));
+        ctxD.putImageData(data.data, 0, 0);
+      }
+
+      $("#original").hide();
+    </script>
+  </body>
+</html>
